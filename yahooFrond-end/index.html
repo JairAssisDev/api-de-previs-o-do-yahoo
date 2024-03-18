@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Previsão de Modelo</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            background-image: url("https://source.unsplash.com/1920x1080/?landscape");
+        }
+
+        #container {
+            width: 400px;
+            padding: 40px;
+            background-color: #fff;
+            border-radius: 12px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        input[type="number"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 5px;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background-color: #0056b3;
+        }
+
+        #resultado {
+            margin-top: 10px;
+            padding: 10px;
+            border-radius: 5px;
+            display: none;
+        }
+
+        #resultado span {
+            font-weight: bold;
+        }
+    </style>
+</head>
+
+<body>
+    <div id="container">
+        <h2>Previsão de Modelo</h2>
+        <input type="number" id="close" placeholder="Close">
+        <input type="number" id="volume" placeholder="Volume">
+        <button onclick="prever()">Prever</button>
+        <div id="resultado">
+            Resultado: <span id="resultado_valor"></span>
+        </div>
+        <p id="resultado_msg" style="display: none;"></p>
+    </div>
+
+    <script>
+        function prever() {
+            var close = parseFloat(document.getElementById("close").value);
+            var volume = parseFloat(document.getElementById("volume").value);
+
+            fetch('http://127.0.0.1:5000/prever', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ "Close": close, "Volume": volume })
+            })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Erro na solicitação. Status: ' + response.status);
+                    }
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.resultado) {
+                        throw new Error('Resposta inválida. Não há resultado.');
+                    }
+                    document.getElementById("resultado_valor").innerText = data.resultado;
+                    document.getElementById("resultado").style.display = "block";
+                    document.getElementById("resultado_msg").style.display = "block";
+                })
+                .catch(error => {
+                    console.error('Erro:', error);
+                    // Exibir mensagem de erro para o usuário
+                    document.getElementById("resultado_msg").innerText = 'Erro: ' + error.message;
+                    document.getElementById("resultado_msg").style.display = "block";
+                });
+        }
+
+    </script>
+</body>
+
+</html>
